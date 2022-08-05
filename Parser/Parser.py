@@ -13,8 +13,8 @@ from selenium.webdriver.chrome.service import Service
 
 
 def get_card_link(search='rtx3080'):
-
-    currtime = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M') # получаем время
+    # --- получаем время и создаем хром драйвер ---
+    currtime = datetime.datetime.now().strftime('%d_%m_%Y_%H_%M')
     option = webdriver.ChromeOptions()
     # useragent = UserAgent(verify_ssl=False)
     option.headless = True
@@ -39,7 +39,7 @@ def get_card_link(search='rtx3080'):
 
     page_count = math.ceil(int(items_di)/18) # получаем количество страниц
 
-
+    # --- получаем данные, если с товарами всего 1 странца ---
     new_new_name = []
     new_new_price = []
     if page_count == 1:
@@ -49,6 +49,7 @@ def get_card_link(search='rtx3080'):
 
         # print('Страниц с товаром = ', page_count)
 
+    # --- получаем данные, если с товарами несколько страниц ---
     else:
 
         num = 1
@@ -74,7 +75,7 @@ def get_card_link(search='rtx3080'):
         new_new_name = [x for l in new_new_name for x in l]
         # print('Страниц с товаром = ',page_count)
 
-
+    # --- создаем словарь ---
     dic = {}
     new_price_txt = []
     for i in new_new_price:
@@ -90,7 +91,7 @@ def get_card_link(search='rtx3080'):
     for i in range(0, len(new_new_price)):
         dic = dict(zip(new_name_txt, new_price_txt))
 
-
+    # --- записываем данные в json файл и в файл CSV, что бы потом отправлять через TG бота ---
     with open('../venv/result_txt.json', 'w', encoding="utf-8") as file:
         json.dump(dic, file, indent=4, ensure_ascii=False)
 
