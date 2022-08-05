@@ -1,17 +1,13 @@
+import json
+from os import getenv
+
+import aiogram.utils.markdown as fmt
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
-from os import getenv
-from Parser import get_card_link
-from aiogram.utils.markdown import hbold, hlink
-import aiogram.utils.markdown as fmt
-import asyncio
-import logging
-import json
-import os
+from aiogram.dispatcher.filters.state import State, StatesGroup
 
+from Parser.Parser import get_card_link
 
 bot_token = getenv("BOT_TOKEN")
 if not bot_token:
@@ -20,12 +16,9 @@ if not bot_token:
 bot = Bot(token=bot_token, parse_mode='html')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-
-
 start_buttons = ['GTX1650', 'GTX1660', 'RTX2060',
                  'RTX3050', 'RTX3060', 'RTX3070',
                  'RTX3070TI', 'RTX3080', 'RTX3090']
-
 
 
 class Video(StatesGroup):
@@ -36,7 +29,6 @@ class Video(StatesGroup):
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-
     start_menu = types.ReplyKeyboardMarkup(resize_keyboard=True)
     start_menu.add(*start_buttons)
 
@@ -44,25 +36,21 @@ async def start(message: types.Message):
     await Video.wait_for_name.set()
 
 
-@dp.message_handler(state= Video.wait_for_name)
+@dp.message_handler(state=Video.wait_for_name)
 async def inp(message: types.Message, state: FSMContext):
-
     async with state.proxy() as data:
         data['wait_for_name'] = message.text
 
     if message.text in start_buttons:
-        choice_buttons = ['Список', 'CSV файл', 'Назад']
+        choice_buttons = ['Список', 'CSV файл']
         keyboard_choice = types.ReplyKeyboardMarkup(resize_keyboard=True)
         keyboard_choice.add(*choice_buttons)
         await message.answer(f'Как отправить данные по {message.text} ?', reply_markup=keyboard_choice)
         await Video.wait_for_choice.set()
 
 
-
-
-@dp.message_handler(state= Video.wait_for_choice)
+@dp.message_handler(state=Video.wait_for_choice)
 async def csv(message: types.Message, state: FSMContext):
-
     await message.answer("Секунду...загружаю....")
     async with state.proxy() as data:
         input_search = data['wait_for_name']
@@ -73,15 +61,15 @@ async def csv(message: types.Message, state: FSMContext):
             dict = json.load(file)
 
         for key in dict:
-            rw = (key,  dict[key])
+            rw = (key, dict[key])
             await message.answer(
-                                fmt.text(
-                                    fmt.text(fmt.hbold(key)),
-                                    # fmt.text("Старая цена:", fmt.hstrikethrough(50), "рублей"),
-                                    fmt.text("Цена:", fmt.hbold(dict[key])),
-                                    sep="\n"
-                                ), parse_mode="HTML"
-                            )
+                fmt.text(
+                    fmt.text(fmt.hbold(key)),
+                    # fmt.text("Старая цена:", fmt.hstrikethrough(50), "рублей"),
+                    fmt.text("Цена:", fmt.hbold(dict[key])),
+                    sep="\n"
+                ), parse_mode="HTML"
+            )
 
 
     elif message.text == 'CSV файл':
@@ -89,8 +77,6 @@ async def csv(message: types.Message, state: FSMContext):
         return await message.reply_document(open(file, 'rb'))
 
     await state.finish()
-
-
 
 
 def main():
