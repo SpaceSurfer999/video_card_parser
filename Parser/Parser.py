@@ -8,6 +8,8 @@ from selenium import webdriver
 # from fake_useragent import UserAgent
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+
+
 # from selenium.webdriver.support.ui import WebDriverWait
 # from selenium.webdriver.support import expected_conditions as EC
 
@@ -34,10 +36,11 @@ def get_card_link(search='rtx3080'):
     driver.get(url=url)
     driver.implicitly_wait(10)
 
-    items = driver.find_element(By.CSS_SELECTOR, '[class="products-count"]').text  #Получаем количество найденных товаров
-    items_di = ' '.join(re.findall(r'\d+', items))       #переводим в цифры
+    items = driver.find_element(By.CSS_SELECTOR,
+                                '[class="products-count"]').text  # Получаем количество найденных товаров
+    items_di = ' '.join(re.findall(r'\d+', items))  # переводим в цифры
 
-    page_count = math.ceil(int(items_di)/18) # получаем количество страниц
+    page_count = math.ceil(int(items_di) / 18)  # получаем количество страниц
 
     # --- получаем данные, если с товарами всего 1 странца ---
     new_new_name = []
@@ -45,7 +48,8 @@ def get_card_link(search='rtx3080'):
     if page_count == 1:
 
         new_new_price = driver.find_elements(By.CSS_SELECTOR, value='[class="product-buy__price"]')
-        new_new_name = driver.find_elements(By.CSS_SELECTOR, value='[class="catalog-product__name ui-link ui-link_black"]')
+        new_new_name = driver.find_elements(By.CSS_SELECTOR, value='[class="catalog-product__name ui-link '
+                                                                   'ui-link_black"]')
 
         # print('Страниц с товаром = ', page_count)
 
@@ -53,7 +57,7 @@ def get_card_link(search='rtx3080'):
     else:
 
         num = 1
-        while num < page_count+1:
+        while num < page_count + 1:
             time.sleep(3)
             driver = webdriver.Chrome(
                 service=Service(r'G:\Coding\Python_project\Scraping\venv\Chromedriver\chromedriver.exe'),
@@ -102,7 +106,6 @@ def get_card_link(search='rtx3080'):
             writer.writerow([key, value])
     print(f'Найдено {items_di} видеокарт')
 
-
     return f'{search}_{currtime}.csv'
 
 
@@ -111,4 +114,4 @@ def main():
 
 
 if __name__ == '__main__':
-   main()
+    main()
